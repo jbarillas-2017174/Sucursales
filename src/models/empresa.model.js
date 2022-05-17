@@ -7,7 +7,7 @@ const empresaSchema = moongose.Schema({
     typeOfCompany: String, 
     municipality: String,  
     password: String
-});
+})
 
 module.exports = moongose.model('Empresa', empresaSchema);
 

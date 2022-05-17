@@ -1,6 +1,6 @@
 'use strict'
 
-const User = require('../model/user.model');
+const empresa = require('../models/empresa.model')
 const bcrypt = require('bcrypt-nodejs');
 
 exports.validateData = (data)=>{
