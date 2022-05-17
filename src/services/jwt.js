@@ -9,8 +9,8 @@ exports.createToken = async (user)=>{
         const payload ={
             sub: user._id,
             name: user.name,
-            username: user.username,
-            email: user.emai,
+            typeOfCompany: user.typeOfCompany,
+            municipality: user.municipality,
             role: user.role,
             iat: moment().unix(),
             exp: moment().add(1, 'hour').unix()
