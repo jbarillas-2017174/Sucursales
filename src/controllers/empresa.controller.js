@@ -1,7 +1,7 @@
 'use strict'
 
 const Empresa = require('../models/empresa.model');
-const { searchUser, encrypt, validateData, searchComany, checkPass } = require('../utils/validate');
+const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission } = require('../utils/validate');
 const jwt = require('../services/jwt');
 
 
@@ -63,7 +63,21 @@ exports.loginCompany = async(req,res) =>{
         console.log(err);
         return res.status(500).send({err, message: 'failed to login'})
     }
-
 }
+
+exports.deleteCompany = async(req, res)=>{
+    try{
+        const empresaId = req.params.id; 
+        const permission = await Empresa.findOne({_id: empresaId}).lean();
+        if(permission == false) return res.status(403).send({message: 'You dont have permission to delete this company'});
+        const companyDeleted = await Empresa.findOneAndDelete({_id: empresaId});
+        if(companyDeleted) return res.send({message: 'Account deleted', companyDeleted}); 
+        return res.send({message: 'Company not found or already deleted'});
+    }catch(err){
+        console.log(err);
+        return res.status(500).send({err, message: 'Error deleting company'});
+    }
+}
+
 
 

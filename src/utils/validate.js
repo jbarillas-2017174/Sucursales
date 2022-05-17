@@ -41,10 +41,10 @@ exports.checkPass = async (password, hash)=>{
     }
 }
 
-
-exports.checkPermission = async (userId, sub)=>{
+/**/
+exports.checkPermission = async (companId, sub)=>{
     try{
-        if(userId != sub){
+        if(companId != sub){
             return false;
         }else{
             return true;
