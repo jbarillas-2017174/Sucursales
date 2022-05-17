@@ -68,14 +68,6 @@ exports.checkUpdate = async (company)=>{
 }
 */
 
-exports.checkUpdateAdmin = async(user)=>{
-    if(user.password ||
-       Object.entries(user).length === 0){
-        return false;
-    }else{
-        return true;
-    }
-}
 
 exports.checkUpdatEmpresa = async(company)=>{
     if(company.sales ||
