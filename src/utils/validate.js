@@ -1,6 +1,6 @@
 'use strict'
 
-const empresa = require('../models/empresa.model')
+const Empresa = require('../models/empresa.model')
 const bcrypt = require('bcrypt-nodejs');
 
 exports.validateData = (data)=>{
@@ -12,9 +12,10 @@ exports.validateData = (data)=>{
     return msg.trim();
 }
 
-exports.searchUser = async (user)=>{
+/*Modificar*/
+exports.searchComany = async (name)=>{
     try{
-        let already = User.findOne({username: user}).lean();
+        let already = Empresa.findOne({name: name}).lean();
         return already;
     }catch(err){
         console.log(err);
