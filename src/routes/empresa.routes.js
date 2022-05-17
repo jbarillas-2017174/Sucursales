@@ -7,3 +7,5 @@ const api = express.Router();
 
 //Rutas 
 api.get('/pruebaEmpresa',empresaController.pruebaEmpresa);
+
+module.exports = api; 
