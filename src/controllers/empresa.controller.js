@@ -1,99 +1,112 @@
 'use strict'
 
 const Empresa = require('../models/empresa.model');
-const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa} = require('../utils/validate');
+const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa } = require('../utils/validate');
 const jwt = require('../services/jwt');
 
 
-exports.pruebaEmpresa = async(req, res) =>{
-    await res.send({message: 'Controller run'}); 
+exports.pruebaEmpresa = async (req, res) => {
+    await res.send({ message: 'Controller run' });
 }
 
-exports.saveEmpresa = async(req,res)=>{
-    try{
-        const params = req.body; 
+exports.saveEmpresa = async (req, res) => {
+    try {
+        const params = req.body;
         let data = {
-            name: params.name, 
+            name: params.name,
             typeOfCompany: params.typeOfCompany,
-            municipality: params.municipality, 
-            password: params.password
+            municipality: params.municipality,
+            password: params.password,
+            role: 'COMPANY'
         }
         let msg = validateData(data);
-        if(!msg){
-            let empresaExist = await searchComany(params.name); 
-            if(!empresaExist){
-                data.name = params.name; 
-                data.typeOfCompany = params.typeOfCompany; 
-                data.municipality = params.municipality; 
+        if (!msg) {
+            let empresaExist = await searchComany(params.name);
+            if (!empresaExist) {
                 data.password = await encrypt(params.password);
 
                 let empresa = new Empresa(data);
-                await empresa.save(); 
-                return res.send({message: 'Company succesfully created'})
-            }else{
-                return res.send({message: 'Company name already in use, choose another name'})
+                await empresa.save();
+                return res.send({ message: 'Empresa creada exitosamente' })
+            } else {
+                return res.send({ message: 'El nombre de la empresa ya está en uso' })
             }
 
-        }else{
+        } else {
             return res.status(400).send(msg);
-        }   
-    }catch(err){
+        }
+    } catch (err) {
         console.log(err)
-        return res.status(500).send({err, message: 'Error saving'})
+        return res.status(500).send({ err, message: 'Error guardando' })
     }
 }
 
-exports.loginCompany = async(req,res) =>{
-    try{
-        const params = req.body; 
+exports.loginCompany = async (req, res) => {
+    try {
+        const params = req.body;
         const data = {
-            name: params.name, 
+            name: params.name,
             password: params.password
         }
         let msg = validateData(data);
-        if(msg) return res.status(400).send(msg);
+        if (msg) return res.status(400).send(msg);
         let alreadyEmpresa = await searchComany(params.name);
-        if(alreadyEmpresa && await checkPass (data.password, alreadyEmpresa.password)){
-        let token = await jwt.createToken(alreadyEmpresa);
-        delete alreadyEmpresa.password; 
+        if (alreadyEmpresa && await checkPass(data.password, alreadyEmpresa.password)) {
+            let token = await jwt.createToken(alreadyEmpresa);
+            delete alreadyEmpresa.password;
 
-        return res.send({token,message: 'Login successfuly',alreadyEmpresa})
-        }else return res.status(401).send({message: 'Error al validar'});
-    }catch(err){
+            return res.send({ token, message: 'Bienvenido', alreadyEmpresa })
+        } else return res.status(401).send({ message: 'Error al validar' });
+    } catch (err) {
         console.log(err);
-        return res.status(500).send({err, message: 'failed to login'})
+        return res.status(500).send({ err, message: 'Error iniciando sesión' })
     }
 }
 
-exports.deleteCompany = async(req, res)=>{
-    try{
-        const empresaId = req.params.id; 
-        const permission = await Empresa.findOne({_id: empresaId}).lean();
-        if(permission == false) return res.status(403).send({message: 'You dont have permission to delete this company'});
-        const companyDeleted = await Empresa.findOneAndDelete({_id: empresaId});
-        if(companyDeleted) return res.send({message: 'Account deleted', companyDeleted}); 
-        return res.send({message: 'Company not found or already deleted'});
-    }catch(err){
+exports.deleteCompany = async (req, res) => {
+    try {
+        const empresaId = req.params.id;
+        const permission = await Empresa.findOne({ _id: empresaId }).lean();
+        if (permission == false) return res.status(403).send({ message: 'No tienes permiso para eliminar esta empresa' });
+        const companyDeleted = await Empresa.findOneAndDelete({ _id: empresaId });
+        if (companyDeleted) return res.send({ message: 'Empresa eliminada', companyDeleted });
+        return res.send({ message: 'Empresa no encontrada o ya eliminada' });
+    } catch (err) {
         console.log(err);
-        return res.status(500).send({err, message: 'Error deleting company'});
+        return res.status(500).send({ err, message: 'Error eliminando empresa' });
     }
 }
 
-exports.updateCompany = async (req, res) =>{
-    try{
-        const empresaId = req.params.id; 
-        const params = req.body; 
-        if(params.password) return res.send({message: 'password cannnot be edited'}); 
+exports.updateCompany = async (req, res) => {
+    try {
+        const empresaId = req.params.id;
+        const params = req.body;
+        if (params.password) return res.send({ message: 'La contraseña no se puede actualizar' });
         const companyEdit = await checkUpdatEmpresa(params);
-        if(companyEdit === false) return res.status(400).send({message:'No parameters have been sent to update'}); 
-        const empresaUpdate = await Empresa.findOneAndUpdate({_id: empresaId}, params, {new:true});
-        if(!empresaUpdate) return res.send({message: 'Company does not ecist or Company not updated'});
-        return res.send({message: 'Company update', empresaUpdate});
-    }catch(err){
+        if (companyEdit === false) return res.status(400).send({ message: 'No se han enviado parámetros' });
+        const empresaUpdate = await Empresa.findOneAndUpdate({ _id: empresaId }, params, { new: true });
+        if (!empresaUpdate) return res.send({ message: 'Empresa no existe, o no actualizada' });
+        return res.send({ message: 'Empresa actualizada', empresaUpdate });
+    } catch (err) {
         console.log(err);
-        return res.status(500).send({message: 'Error update company'})
+        return res.status(500).send({ message: 'Error actualizando' })
     }
 }
 
-
+exports.createAdmin = async (req, res) => {
+    try {
+        if (await Empresa.find() == '' || !await Empresa.findOne({name: 'SuperAdmin'})) {
+            const data = {
+                name: 'SuperAdmin',
+                password: '123456',
+                role: 'ADMIN'
+            }
+            const admin = new Empresa(data);
+            await admin.save();
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({ message: 'Error saving admin' })
+    }
+}
 
