@@ -1,7 +1,7 @@
 'use strict'
 
 const Empresa = require('../models/empresa.model');
-const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission } = require('../utils/validate');
+const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa} = require('../utils/validate');
 const jwt = require('../services/jwt');
 
 
@@ -76,6 +76,22 @@ exports.deleteCompany = async(req, res)=>{
     }catch(err){
         console.log(err);
         return res.status(500).send({err, message: 'Error deleting company'});
+    }
+}
+
+exports.updateCompany = async (req, res) =>{
+    try{
+        const empresaId = req.params.id; 
+        const params = req.body; 
+        if(params.password) return res.send({message: 'password cannnot be edited'}); 
+        const companyEdit = await checkUpdatEmpresa(params);
+        if(companyEdit === false) return res.status(400).send({message:'No parameters have been sent to update'}); 
+        const empresaUpdate = await Empresa.findOneAndUpdate({_id: empresaId}, params, {new:true});
+        if(!empresaUpdate) return res.send({message: 'Company does not ecist or Company not updated'});
+        return res.send({message: 'Company update', empresaUpdate});
+    }catch(err){
+        console.log(err);
+        return res.status(500).send({message: 'Error update company'})
     }
 }
 

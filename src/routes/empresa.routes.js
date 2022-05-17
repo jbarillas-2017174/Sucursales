@@ -12,6 +12,7 @@ api.post('/saveEmpresa',empresaController.saveEmpresa);
 api.post('/loginCompany',empresaController.loginCompany);
 
 api.delete('/deleteCompany/:id', mdAuth.ensureAuth,empresaController.deleteCompany);
+api.put('/updateCompany/:id', mdAuth.ensureAuth, empresaController.updateCompany);
 
 
 module.exports = api; 

@@ -55,15 +55,19 @@ exports.checkPermission = async (companId, sub)=>{
     }
 }
 
-exports.checkUpdate = async (user)=>{
-    if(user.password || 
-       Object.entries(user).length === 0 || 
-       user.role){
+/* Editar*/
+/*
+exports.checkUpdate = async (company)=>{
+    if(company.password || 
+       Object.entries(company).length === 0 || 
+       company.name){
         return false;
     }else{
         return true;
     }
 }
+*/
+
 exports.checkUpdateAdmin = async(user)=>{
     if(user.password ||
        Object.entries(user).length === 0){
@@ -72,3 +76,13 @@ exports.checkUpdateAdmin = async(user)=>{
         return true;
     }
 }
+
+exports.checkUpdatEmpresa = async(company)=>{
+    if(company.sales ||
+       Object.entries(company).length === 0){
+        return false;
+    }else{
+        return true;
+    }
+}
+
