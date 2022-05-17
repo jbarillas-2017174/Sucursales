@@ -9,5 +9,7 @@ const api = express.Router();
 api.get('/pruebaEmpresa',empresaController.pruebaEmpresa);
 
 api.post('/saveEmpresa',empresaController.saveEmpresa);
+api.post('/loginCompany',empresaController.loginCompany);
+
 
 module.exports = api; 
