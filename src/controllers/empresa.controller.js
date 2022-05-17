@@ -27,9 +27,9 @@ exports.saveEmpresa = async (req, res) => {
 
                 let empresa = new Empresa(data);
                 await empresa.save();
-                return res.send({ message: 'Company succesfully created' })
+                return res.send({ message: 'Empresa creada exitosamente' })
             } else {
-                return res.send({ message: 'Company name already in use, choose another name' })
+                return res.send({ message: 'El nombre de la empresa ya está en uso' })
             }
 
         } else {
@@ -37,7 +37,7 @@ exports.saveEmpresa = async (req, res) => {
         }
     } catch (err) {
         console.log(err)
-        return res.status(500).send({ err, message: 'Error saving' })
+        return res.status(500).send({ err, message: 'Error guardando' })
     }
 }
 
@@ -55,11 +55,11 @@ exports.loginCompany = async (req, res) => {
             let token = await jwt.createToken(alreadyEmpresa);
             delete alreadyEmpresa.password;
 
-            return res.send({ token, message: 'Login successfuly', alreadyEmpresa })
+            return res.send({ token, message: 'Bienvenido', alreadyEmpresa })
         } else return res.status(401).send({ message: 'Error al validar' });
     } catch (err) {
         console.log(err);
-        return res.status(500).send({ err, message: 'failed to login' })
+        return res.status(500).send({ err, message: 'Error iniciando sesión' })
     }
 }
 
@@ -67,13 +67,13 @@ exports.deleteCompany = async (req, res) => {
     try {
         const empresaId = req.params.id;
         const permission = await Empresa.findOne({ _id: empresaId }).lean();
-        if (permission == false) return res.status(403).send({ message: 'You dont have permission to delete this company' });
+        if (permission == false) return res.status(403).send({ message: 'No tienes permiso para eliminar esta empresa' });
         const companyDeleted = await Empresa.findOneAndDelete({ _id: empresaId });
-        if (companyDeleted) return res.send({ message: 'Account deleted', companyDeleted });
-        return res.send({ message: 'Company not found or already deleted' });
+        if (companyDeleted) return res.send({ message: 'Empresa eliminada', companyDeleted });
+        return res.send({ message: 'Empresa no encontrada o ya eliminada' });
     } catch (err) {
         console.log(err);
-        return res.status(500).send({ err, message: 'Error deleting company' });
+        return res.status(500).send({ err, message: 'Error eliminando empresa' });
     }
 }
 
@@ -81,22 +81,20 @@ exports.updateCompany = async (req, res) => {
     try {
         const empresaId = req.params.id;
         const params = req.body;
-        if (params.password) return res.send({ message: 'password cannnot be edited' });
+        if (params.password) return res.send({ message: 'La contraseña no se puede actualizar' });
         const companyEdit = await checkUpdatEmpresa(params);
-        if (companyEdit === false) return res.status(400).send({ message: 'No parameters have been sent to update' });
+        if (companyEdit === false) return res.status(400).send({ message: 'No se han enviado parámetros' });
         const empresaUpdate = await Empresa.findOneAndUpdate({ _id: empresaId }, params, { new: true });
-        if (!empresaUpdate) return res.send({ message: 'Company does not ecist or Company not updated' });
-        return res.send({ message: 'Company update', empresaUpdate });
+        if (!empresaUpdate) return res.send({ message: 'Empresa no existe, o no actualizada' });
+        return res.send({ message: 'Empresa actualizada', empresaUpdate });
     } catch (err) {
         console.log(err);
-        return res.status(500).send({ message: 'Error update company' })
+        return res.status(500).send({ message: 'Error actualizando' })
     }
 }
 
 exports.createAdmin = async (req, res) => {
     try {
-        const company = await Empresa.find();
-        const nameA = await Empresa.findOne({name: 'SuperAdmin'});
         if (await Empresa.find() == '' || !await Empresa.findOne({name: 'SuperAdmin'})) {
             const data = {
                 name: 'SuperAdmin',
