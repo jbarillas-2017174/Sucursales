@@ -6,6 +6,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const empresaRoutes = require('../src/routes/empresa.routes');
+const sucursalesRoutes = require('../src/routes/sucursales.routes');
 
 
 
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.use(cors());
 app.use('/empresa', empresaRoutes);
+app.use('/sucursales', sucursalesRoutes);
 
 
 module.exports = app;
