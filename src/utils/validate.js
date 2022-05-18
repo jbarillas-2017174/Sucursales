@@ -2,6 +2,7 @@
 
 const Empresa = require('../models/empresa.model')
 const bcrypt = require('bcrypt-nodejs');
+const productsCModel = require('../models/productsC.model');
 
 exports.validateData = (data)=>{
     let keys = Object.keys(data), msg = '';
@@ -71,6 +72,15 @@ exports.checkUpdate = async (company)=>{
 
 exports.checkUpdatEmpresa = async(company)=>{
     if(company.sales ||
+       Object.entries(company).length === 0){
+        return false;
+    }else{
+        return true;
+    }
+}
+
+exports.checkUpdateProduct = async(company)=>{
+    if(product.company ||
        Object.entries(company).length === 0){
         return false;
     }else{
