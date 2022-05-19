@@ -110,3 +110,46 @@ exports.createAdmin = async (req, res) => {
     }
 }
 
+
+/*Eliminar Empresa*/
+exports.deleteCompany = async(req,res)=>{
+    try{
+        const companyDent = req.params.id; 
+        const searchCompany = await Empresa.findOne({_id: companyDent}); 
+        if(!searchComany) return res.send({message: 'No puedes realizar esta accion'}); 
+        if(searchComany.role === 'ADMIN') return res.send({message: 'No se realizo la funcion eliminar empresa'});
+        const companyDeleted = await Empresa.findOneAndDelete({_id: companyDent});
+
+        if(!companyDeleted) return res.send({message: 'Action not allowed'}); 
+        return res.send({companyDeleted, message: 'Account deleted Successfuly'})
+    }catch(err){
+        console.log(err);
+        return res.status(500).send({message: 'Delete user Admin'})
+    }
+}
+
+exports.adminComany = async(req,res)=>{
+    try{
+        const params = req.body; 
+        const data = {
+            name: params.name, 
+            typeOfCompany: params.typeOfCompany, 
+            municipality: params.municipality, 
+            password: params.password, 
+            role: params.role
+        }
+        const msg = validateData(data);
+        if(msg) return res.status(400).send(msg);
+        const companyExist = await searchComany(params.name);
+        if(companyExist) return res.send({message: 'Warning: el nombre ya fue utilizado por una empresa'});
+        if(params.role != 'ADMIN') return res.status(400).send({message: 'role invalido'}); 
+        data.name = params.name; 
+        data.password = params.password; 
+        const company = new Empresa(data);
+        await Empresa.save();
+        return res.send({message: 'Empresa creada'})
+    }catch(err){
+        console.log(err);
+        return res.status(500).send({message: 'Error adminComany'}); 
+    }
+}
