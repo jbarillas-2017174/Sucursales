@@ -79,13 +79,6 @@ exports.checkUpdatEmpresa = async(company)=>{
     }
 }
 
-exports.checkUpdateProduct = async(company)=>{
-    if(product.company ||
-       Object.entries(company).length === 0){
-        return false;
-    }else{
-        return true;
-    }
-}
+
 
 
