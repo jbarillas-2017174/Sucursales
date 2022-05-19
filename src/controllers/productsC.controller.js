@@ -62,7 +62,22 @@ exports.updateProduct = async (req, res) => {
     }
 }
 
+exports.getProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const product = await ProductsC.findOne({ _id: productId });
+        if(product.company != req.user.sub){
+        return res.status(403).send({message: 'This product was not found in your company'});   
+        } else {
+            const searchProduct = await ProductsC.findOne({_id: productId}); 
+        return res.send({message: 'Product Found', searchProduct});}
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({message: 'Error getting products'})
 
+    }
+
+}
 
 // getProduct & getProducts
 // const product = await ProductsC.findOne({company: req.user.sub})
