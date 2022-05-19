@@ -10,6 +10,7 @@ const sucursalesRoutes = require('../src/routes/sucursales.routes');
 
 
 
+
 const app = express(); 
 
 app.use(morgan('dev'));
