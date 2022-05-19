@@ -80,5 +80,12 @@ exports.checkUpdatEmpresa = async(company)=>{
 }
 
 
-
+exports.checkUpdateAdmin = async(name)=>{
+    if(name.password ||
+        Object.entries(name).length === 0){
+            return false; 
+        }else{
+            return true; 
+     }
+}
 
