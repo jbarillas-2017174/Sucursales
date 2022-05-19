@@ -3,6 +3,7 @@
 const ProductsC = require('../models/productsC.model');
 const { validateData } = require('../utils/validate');
 const jwt = require('../services/jwt');
+const Sucursales = require('../models/sucursales.model')
 
 
 exports.saveProduct = async (req, res) => {
@@ -91,6 +92,39 @@ exports.getProducts = async (req, res) => {
 
 }
 
-// getProduct & getProducts
-// const product = await ProductsC.findOne({company: req.user.sub})
-// if(!product) return res.status(404).send({message: 'product not found'})
+/*--------------------------------Funciones Producto de Sucursal-----------------------------*/ 
+
+exports.exportProduct = async(req, res)=>{
+    try{
+        const id = req.params.id
+        const params = req.body
+        const productF = await ProductsC.findOne({_id: id}).lean()
+        const data = {
+            producto: id,
+            name: productF.nameProduct,
+            stock: params.stock, //Sucursal: params.sucursal(idSucursal) 
+            cantidadV: params.cantidadV
+        }
+        
+        let msg = validateData(data);
+        data.sucursal = params.sucursal;
+        if(msg) return res.status(400).send(msg);
+        const stocks = productF.stock - data.stock;
+        if(stocks < 0) return res.status(404).send({message: 'Insuficient product'})
+        
+        /*const sucursal = await Sucursales.findOne({_id: data.sucursal}).lean();
+        for(let i=0; i < sucursal.productoS.length; i++){
+            console.log(sucursal.productoS[i].name);
+            const name = sucursal.productoS[i].name
+            if(name === data.name){
+                (await Sucursales.findOne({productS[nam]}))
+            }
+        }*/
+        const sucursalUp = await Sucursales.findOneAndUpdate({_id: data.sucursal }, {$push: {productoS: data}}, {new:true});
+        await ProductsC.findOneAndUpdate({_id: id}, {stock: stocks}, {new: true})
+        return res.send({message: 'ProductoGuardado', sucursalUp})
+    }catch(err){
+        console.log(err);
+        return res.status(500).send({message: 'Error exports Products'})
+    }
+}

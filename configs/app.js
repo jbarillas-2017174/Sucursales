@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const empresaRoutes = require('../src/routes/empresa.routes');
 const sucursalRoutes = require('../src/routes/sucursales.routes');
 const productCRoutes = require('../src/routes/productsC.routes');
-
+const productSRoutes = require('../src/routes/productS.routes');
 
 
 
@@ -22,6 +22,7 @@ app.use(cors());
 app.use('/empresa', empresaRoutes);
 app.use('/sucursal', sucursalRoutes);
 app.use('/productC', productCRoutes);
+app.use('/productS', productSRoutes);
 
 
 
