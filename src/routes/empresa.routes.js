@@ -11,8 +11,8 @@ api.get('/pruebaEmpresa',empresaController.pruebaEmpresa);
 api.post('/saveEmpresa',empresaController.saveEmpresa);
 api.post('/loginCompany',empresaController.loginCompany);
 
-api.delete('/deleteCompany/:id', mdAuth.ensureAuth,empresaController.deleteCompany);
-api.put('/updateCompany/:id', mdAuth.ensureAuth, empresaController.updateCompany);
+api.delete('/deleteCompany/:id', [mdAuth.ensureAuth, mdAuth.isAdmin],empresaController.deleteCompany);
+api.put('/updateCompany/:id',[mdAuth.ensureAuth, mdAuth.isAdmin], empresaController.updateCompany);
 
 
 module.exports = api; 

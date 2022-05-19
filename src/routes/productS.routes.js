@@ -6,6 +6,6 @@ const express = require('express');
 const api = express.Router();
 
 
-api.post('/createProduct/:id', mdAuth.ensureAuth, productsController.createProduct);
+api.post('/createProduct/:id', [mdAuth.ensureAuth, mdAuth.isAdmin], productsController.createProduct);
 
 module.exports = api

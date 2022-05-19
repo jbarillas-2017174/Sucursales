@@ -3,6 +3,9 @@
 const Empresa = require('../models/empresa.model');
 const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa } = require('../utils/validate');
 const jwt = require('../services/jwt');
+const BranchOffice = require('../models/sucursales.model');
+const ProductsC = require('../models/productsC.model');
+const ProductoS = require("../models/productsS.model");
 
 
 exports.pruebaEmpresa = async (req, res) => {
@@ -69,6 +72,7 @@ exports.deleteCompany = async (req, res) => {
         const permission = await Empresa.findOne({ _id: empresaId }).lean();
         if (permission == false) return res.status(403).send({ message: 'No tienes permiso para eliminar esta empresa' });
         const companyDeleted = await Empresa.findOneAndDelete({ _id: empresaId });
+        const sucursalDelete = await BranchOffice.findOneAndDelete({idEmpresa: empresaId});
         if (companyDeleted) return res.send({ message: 'Empresa eliminada', companyDeleted });
         return res.send({ message: 'Empresa no encontrada o ya eliminada' });
     } catch (err) {
