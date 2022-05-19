@@ -79,6 +79,18 @@ exports.getProduct = async (req, res) => {
 
 }
 
+exports.getProducts = async (req, res) => {
+    try {
+        const searchProduct = await ProductsC.find({company: req.user.sub})
+        return res.send({message: 'Products Found:', searchProduct});
+    } catch (err) {
+        console.log(err);
+        return res.status(500).send({message: 'Error getting products'})
+
+    }
+
+}
+
 // getProduct & getProducts
 // const product = await ProductsC.findOne({company: req.user.sub})
 // if(!product) return res.status(404).send({message: 'product not found'})
