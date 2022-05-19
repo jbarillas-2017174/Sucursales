@@ -10,9 +10,13 @@ api.get('/pruebaEmpresa',empresaController.pruebaEmpresa);
 
 api.post('/saveEmpresa',empresaController.saveEmpresa);
 api.post('/loginCompany',empresaController.loginCompany);
-
 api.delete('/deleteCompany/:id', mdAuth.ensureAuth,empresaController.deleteCompany);
 api.put('/updateCompany/:id', mdAuth.ensureAuth, empresaController.updateCompany);
 
+/*This*/
+api.post('/adminCompany', [mdAuth.ensureAuth,mdAuth.isAdmin], empresaController.adminComany);
+api.delete('/deleteAdminCompany/:id',[mdAuth.ensureAuth, mdAuth.isAdmin] ,empresaController.deleteAdminCompany);
+api.get('/getCompany', [mdAuth.ensureAuth, mdAuth.isAdmin], empresaController.getCompany);
+api.put('/updateAdminCompany/:id',[mdAuth.ensureAuth, mdAuth.isAdmin], empresaController.updateAdminCompany);
 
 module.exports = api; 

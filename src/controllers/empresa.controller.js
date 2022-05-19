@@ -1,7 +1,7 @@
 'use strict'
 
 const Empresa = require('../models/empresa.model');
-const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa } = require('../utils/validate');
+const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa, checkUpdateAdmin } = require('../utils/validate');
 const jwt = require('../services/jwt');
 
 
@@ -112,7 +112,7 @@ exports.createAdmin = async (req, res) => {
 
 
 /*Eliminar Empresa*/
-exports.deleteCompany = async(req,res)=>{
+exports.deleteAdminCompany = async(req,res)=>{
     try{
         const companyDent = req.params.id; 
         const searchCompany = await Empresa.findOne({_id: companyDent}); 
@@ -128,6 +128,7 @@ exports.deleteCompany = async(req,res)=>{
     }
 }
 
+/*Crear una empresa*/
 exports.adminComany = async(req,res)=>{
     try{
         const params = req.body; 
@@ -145,11 +146,49 @@ exports.adminComany = async(req,res)=>{
         if(params.role != 'ADMIN') return res.status(400).send({message: 'role invalido'}); 
         data.name = params.name; 
         data.password = params.password; 
+
         const company = new Empresa(data);
-        await Empresa.save();
+        await company.save();
         return res.send({message: 'Empresa creada'})
     }catch(err){
         console.log(err);
         return res.status(500).send({message: 'Error adminComany'}); 
+    }
+}
+
+/*Verificar Empresas*/
+exports.getCompany = async (req,res)=>{
+    try{
+        const dentCompany = await Empresa.find();
+        return res.send({message: 'GetCompany Found', dentCompany}); 
+    }catch(err){
+        console.log(err);
+        return res.status(500).send('Error Get Company')
+    }
+}
+
+exports.updateAdminCompany = async(req,res)=>{
+    try{
+        const dentCompany = req.params.id; 
+        const params = req.body; 
+
+        const searchCompany = await Empresa.findOne({_id: dentCompany});
+        if(!searchComany) return res.send({message: 'Company not found, try again'}); 
+        const companyParams = await checkUpdateAdmin(params); 
+
+        if(companyParams === false) return res.send({message: 'Parámetros vacíos o parámetros no actualizados, intente nuevamente'}); 
+        if(searchComany.role === 'ADMIN') return res.send({message: 'Acción no permitida'});
+
+        const nameCompany = await searchComany(params.name);
+        if(nameCompany && searchComany.name != params.name) return res.send({message: 'Nombre de la empresa ya esta en uso'});
+        if(params.role === 'ADMIN') return res.status(400).send({message: 'Invaled role' });
+
+        const companyUpdate = await Empresa.findOneAndUpdate({_id: dentCompany},params,{new: true});
+        if(!companyUpdate) return req.send({message: 'Company Update'}); 
+        return res.send({companyUpdate, message: 'Empresa actualizada'});
+
+    } catch(err){
+        console.log(err); 
+        return res.status(500).send('Error Update Company');
     }
 }
