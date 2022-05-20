@@ -24,7 +24,7 @@ exports.saveBranchOffice = async (req, res)=>{
         if(!msg){
             const brachOffice = new BranchOffice(data);
             await brachOffice.save();
-            return res.send({message: 'Sucursal creada'});
+            return res.send({message: 'Branch Office created'});
         }else return res.status(400).send(msg)
     }catch(err){
         console.log(err);
@@ -37,8 +37,8 @@ exports.deleteBranchOffice = async(req, res)=>{
         const branchOfficeId = req.params.id;
         const branchOfficeDeleted = await BranchOffice.findOneAndDelete({_id:branchOfficeId}).lean().populate('idEmpresa');
         delete branchOfficeDeleted.idEmpresa.password;
-        if(!branchOfficeDeleted)  return res.status(500).send({message: 'Sucursal no encontrada o ya fue eliminada'});
-        return res.send({branchOfficeDeleted, message: 'Sucursal eliminada'});
+        if(!branchOfficeDeleted)  return res.status(500).send({message: 'Not found'});
+        return res.send({branchOfficeDeleted, message: 'Branch office deleted'});
         
     }catch(err){
         console.log(err);
@@ -50,7 +50,7 @@ exports.getBranchOffice = async(req,res)=>{
     try{
         const branchOfficeId = req.params.id;
         const branchOffice = await BranchOffice.findOne({_id: branchOfficeId, idEmpresa: req.user.sub});
-        if(!branchOffice) return res.send({message: 'Sucursal no encontrada'});
+        if(!branchOffice) return res.send({message: 'Not found'});
         return res.send({branchOffice});
     }catch(err){
         console.log(err);
@@ -72,7 +72,7 @@ exports.updateBranchOffice = async (req,res) =>{
     try{
         const branchOfficeId = req.params.id;
         const params = req.body;
-        if(Object.entries(params).length === 0) return res.status(400).send({message: 'there are no any params'});
+        if(Object.entries(params).length === 0) return res.status(400).send({message: 'Params not received'});
         const branchOffices = await BranchOffice.find({idEmpresa: req.user.sub});
         if(!branchOffices) return res.satus(500).send({message: 'Action not authorized'});
         const already = await BranchOffice.findOne({idEmpresa: req.user.sub, name: params.name});

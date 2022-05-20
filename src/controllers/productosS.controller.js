@@ -43,14 +43,24 @@ exports.createProduct = async (req, res) => {
         { stock: stockT },
         { new: true }
       );
-      if (product) return res.send({ message: "Se guardo Producto" });
+      if (product) return res.send({ message: "Product saved" });
     } else {
       let productoS = new ProductoS(data);
       await productoS.save();
-      return res.send({ message: "Se creo Producto" });
+      return res.send({ message: "Product created" });
     }
   } catch (err) {
     console.log(err);
     return err;
   }
 };
+
+exports.getProduct = async(req, res) =>{
+  try{
+    const productS = await ProductoS.find().sort({stock: -1})
+    return res.send({message: 'Products Found:', productS});
+  }catch(err){
+    console.log(err);
+        return err;
+  }
+}
