@@ -7,7 +7,7 @@ const productsSSchema = moongose.Schema({
   name: String,
   stock: Number,
   cantidadV: Number,
-  idSucursal: {type: mongoose.Schema.ObjectId, ref: 'Sucursales'}
+  idSucursal: { type: mongoose.Schema.ObjectId, ref: 'Sucursales' }
 });
 
 module.exports = moongose.model("productsS", productsSSchema);

@@ -19,8 +19,13 @@ exports.createProduct = async (req, res) => {
     if (msg) return res.send(msg);
     const already = await ProductoS.findOne({ name: data.name });
     let stockC = alreadyProduct.stock - parseInt(params.stock);
-    console.log(already.stock, "+", parseInt(params.stock), "=");
-    let stockT = already.stock + parseInt(params.stock);
+    let stockT;
+    if(already == null) {
+      stockT = 0 + parseInt(params.stock);
+    }else{
+      stockT = already.stock + parseInt(params.stock);
+    }
+    
     if (stockC < 0) {
       stockC = alreadyProduct.stock - (stockC + parseInt(params.stock));
       stockT = already.stock + alreadyProduct.stock;

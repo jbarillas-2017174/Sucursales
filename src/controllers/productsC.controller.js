@@ -15,7 +15,8 @@ exports.saveProduct = async (req, res) => {
             stock: params.stock,
             company: req.user.sub
         }
-
+        const already = await ProductsC.findOne({nameProduct: params.nameProduct, company: data.company});
+        if(already) return res.status(400).send({message: 'Product already'});
         let msg = validateData(data);
         if (msg) return res.status(400).send(msg)
         if (!msg) {
