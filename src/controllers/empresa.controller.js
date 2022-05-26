@@ -3,9 +3,6 @@
 const Empresa = require('../models/empresa.model');
 const { searchUser, encrypt, validateData, searchComany, checkPass, checkPermission, checkUpdate, checkUpdatEmpresa, checkUpdateAdmin } = require('../utils/validate');
 const jwt = require('../services/jwt');
-const BranchOffice = require('../models/sucursales.model');
-const ProductsC = require('../models/productsC.model');
-const ProductoS = require("../models/productsS.model");
 
 
 exports.pruebaEmpresa = async (req, res) => {
@@ -18,7 +15,7 @@ exports.saveEmpresa = async (req, res) => {
         let data = {
             name: params.name,
             typeOfCompany: params.typeOfCompany,
-            town: params.town,
+            municipality: params.municipality,
             password: params.password,
             role: 'COMPANY'
         }
@@ -30,9 +27,9 @@ exports.saveEmpresa = async (req, res) => {
 
                 let empresa = new Empresa(data);
                 await empresa.save();
-                return res.send({ message: 'Company created' })
+                return res.send({ message: 'Company Saved' })
             } else {
-                return res.send({ message: 'Name already in use' })
+                return res.send({ message: 'Name in use' })
             }
 
         } else {
@@ -59,21 +56,21 @@ exports.loginCompany = async (req, res) => {
             delete alreadyEmpresa.password;
 
             return res.send({ token, message: 'Welcome', alreadyEmpresa })
-        } else return res.status(401).send({ message: 'Wrong user or password' });
+        } else return res.status(401).send({ message: 'Log in error' });
     } catch (err) {
         console.log(err);
-        return res.status(500).send({ err, message: 'Error login' });
+        return res.status(500).send({ err, message: 'Error' })
     }
 }
 
 exports.deleteCompany = async (req, res) => {
     try {
         const empresaId = req.params.id;
-        const permission = await Empresa.findOne({ _id: empresaId }).lean();
+        const permission = await checkPermission(empresaId, req.user.sub);
         if (permission == false) return res.status(403).send({ message: 'Insuficient permissions' });
         const companyDeleted = await Empresa.findOneAndDelete({ _id: empresaId });
         if (companyDeleted) return res.send({ message: 'Company deleted', companyDeleted });
-        return res.send({ message: 'Company not found' });
+        return res.send({ message: 'Company not found or already deleted' });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ err, message: 'Error deleting' });
@@ -87,6 +84,9 @@ exports.updateCompany = async (req, res) => {
         if (params.password) return res.send({ message: 'Password cannot updated' });
         const companyEdit = await checkUpdatEmpresa(params);
         if (companyEdit === false) return res.status(400).send({ message: 'Params not received' });
+        const permission = await checkPermission(empresaId, req.user.sub);
+        
+        if(permission === false) return res.status(401).send({message: 'Insuficient Permission'});
         const empresaUpdate = await Empresa.findOneAndUpdate({ _id: empresaId }, params, { new: true });
         if (!empresaUpdate) return res.send({ message: 'Company not found or not updated' });
         return res.send({ message: 'Company Updated', empresaUpdate });
@@ -104,13 +104,12 @@ exports.createAdmin = async (req, res) => {
                 password: '123456',
                 role: 'ADMIN'
             }
-            data.password = await encrypt(data.password);
             const admin = new Empresa(data);
             await admin.save();
         }
     } catch (err) {
         console.log(err);
-        return res.status(500).send({ message: 'Error saving admin' })
+        return res.status(500).send({ message: 'Error saving ADMIN' })
     }
 }
 
@@ -118,18 +117,18 @@ exports.createAdmin = async (req, res) => {
 /*Eliminar Empresa*/
 exports.deleteAdminCompany = async(req,res)=>{
     try{
-        const companyDent = req.params.id; 
-        const searchCompany = await Empresa.findOne({_id: companyDent}); 
-        if(!searchCompany) return res.send({message: 'Insuficient permissions'}); 
-        if(searchComany.role === 'ADMIN') return res.send({message: 'Cannot delete this user'});
-        const companyDeleted = await Empresa.findOneAndDelete({_id: companyDent}).lean();
-        delete companyDeleted.password
-        const sucursalDelete = await BranchOffice.findOneAndDelete({idEmpresa: companyDent});
-        if(!companyDeleted) return res.send({message: 'Action not allowed'}); 
-        return res.send({companyDeleted, message: 'Account deleted Successfuly'})
+        const searchComany = req.params.id; 
+        const searchCompany = await Empresa.findOne({_id: searchComany});
+        if(!searchCompany) return res.status(404).send({message: 'Company not found or already deleted'})
+
+        if(!searchComany) return res.send({message: 'Insuficient permissions'}); 
+        if(searchCompany.role === 'ADMIN') return res.send({message: 'Cannot delete company'});
+        const companyDeleted = await Empresa.findOneAndDelete({_id: searchComany});
+        if(!companyDeleted) return res.send({message: 'Insuficient permissions'}); 
+        return res.send({companyDeleted, message: 'Company deleted'})
     }catch(err){
         console.log(err);
-        return res.status(500).send({message: 'Delete user Admin'})
+        return res.status(500).send({message: 'Error deleting'})
     }
 }
 
@@ -140,22 +139,24 @@ exports.adminComany = async(req,res)=>{
         const data = {
             name: params.name, 
             typeOfCompany: params.typeOfCompany, 
-            town: params.town, 
+            municipality: params.municipality, 
             password: params.password, 
-            role: 'COMPANY'
+            role: params.role
         }
         const msg = validateData(data);
         if(msg) return res.status(400).send(msg);
         const companyExist = await searchComany(params.name);
-        if(companyExist) return res.send({message: 'Name in use'});
-        data.password = await encrypt(params.password);
+        if(companyExist) return res.send({message: 'Warning: Name in use'});
+        if(params.role != 'ADMIN') return res.status(400).send({message: 'Invalid role'}); 
+        data.name = params.name; 
+        data.password = params.password; 
 
         const company = new Empresa(data);
         await company.save();
-        return res.send({message: 'Company created'})
+        return res.send({message: 'Empresa created'})
     }catch(err){
         console.log(err);
-        return res.status(500).send({message: 'Error adminComany'}); 
+        return res.status(500).send({message: 'Error creating'}); 
     }
 }
 
@@ -163,7 +164,7 @@ exports.adminComany = async(req,res)=>{
 exports.getCompany = async (req,res)=>{
     try{
         const dentCompany = await Empresa.find();
-        return res.send({message: 'Company Found', dentCompany}); 
+        return res.send({message: 'Company Found:', dentCompany}); 
     }catch(err){
         console.log(err);
         return res.status(500).send('Error Get Company')
@@ -179,21 +180,19 @@ exports.updateAdminCompany = async(req,res)=>{
         if(!searchComany) return res.send({message: 'Company not found, try again'}); 
         const companyParams = await checkUpdateAdmin(params); 
 
-        if(companyParams === undefined) return res.send({message: 'Params not received'}); 
+        if(companyParams === false) return res.send({message: 'Params not received'}); 
         if(searchComany.role === 'ADMIN') return res.send({message: 'Action not allowed'});
-        if(params.password) return res.send({message: 'Cannot update password'});
 
         const nameCompany = await searchComany(params.name);
         if(nameCompany && searchComany.name != params.name) return res.send({message: 'Name in use'});
         if(params.role === 'ADMIN') return res.status(400).send({message: 'Invalid role' });
 
-        const companyUpdate = await Empresa.findOneAndUpdate({_id: dentCompany},params,{new: true}).lean();
-        delete companyUpdate.password;
-        if(!companyUpdate) return req.send({message: 'Company not updated'}); 
+        const companyUpdate = await Empresa.findOneAndUpdate({_id: dentCompany},params,{new: true});
+        if(!companyUpdate) return req.send({message: 'Company not Update'}); 
         return res.send({companyUpdate, message: 'Company Updated'});
 
     } catch(err){
         console.log(err); 
-        return res.status(500).send('Error Update Company');
+        return res.status(500).send('Error Updating');
     }
 }
